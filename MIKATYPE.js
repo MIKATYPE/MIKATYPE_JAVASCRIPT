@@ -1,6 +1,7 @@
 ﻿/* ************************************************************************** */
 /* 美佳のタイプトレーナー JAVASCRIPT版ソースコード Ver2.06.01   2023/8/21     */
 /*                                          	   Ver2.06.02   2023/12/27    */
+/*                                          	   Ver2.06.03   2024/11/22    */
 /*                                           Copy right 今村二朗              */
 /*                                                                            */
 /* このソースコードは 改変、転載、他ソフトの使用など自由にお使いください      */
@@ -161,7 +162,7 @@ MIKA_menu_kind_flag=0; /* =1 キーガイド表示あり =3 キーガイド表�
 MIKA_key_guide_on=1; /* 定数 キーガイド表示あり */
 MIKA_key_guide_off=3; /* 定数 キーガイド表示無し */
 MIKA_type_end_flag = 0; /* 練習終了フラグ =0 ESCによる終了 =1 60文字入力による終了 */
-MIKA_mes0="●●●  美佳のタイプトレーナー Ver2.06.02  ●●●";
+MIKA_mes0="●●●  美佳のタイプトレーナー Ver2.06.03  ●●●";
 MIKA_mes0a="●●●  美佳のタイプトレーナー ポジション練習　●●●";
 MIKA_mes0b="●●●  美佳のタイプトレーナー ランダム練習　●●●";
 MIKA_mesta="●●●  美佳のタイプトレーナー %s　●●●";
@@ -3493,7 +3494,7 @@ function dispatrain(g,mest) /* ローマ字ランダム練習 ローマ字単語
 		cslclr(g); /* 画面クリア */
 		disptitle(g,mest,MIKA_type_kind_mes); /* 練習項目を表示 */
 		cslcolor(g,MIKA_blue); /* 表示色を青に設定 */
-		cslput(g,2*16,28*8,"ローマ字＝"); 
+		cslput(g,2*16+8,28*8,"ローマ字＝"); 
 		cslcolor(g,MIKA_green); /* 表示色を緑に設定 */
 		cslput(g,4*16,4*8,"制限時間60秒"); /* 制限時間を表示 */
 		if (MIKA_p_count[MIKA_type_kind_no]!=0) /* 練習回数がゼロでない場合 */
@@ -4342,6 +4343,12 @@ function proctrain(g,nChar) /* ランダム練習 英単語練習の文字入力
 							MIKA_c_p1=0; /* 横座標をゼロに設定*/
 							MIKA_c_p2++; /* 縦座標をインクリメント */
 						}
+						if(MIKA_ttype_speed_time>MIKA_random_key_limit) /* 練習時間が制限時間を越した場合 */
+						{
+							MIKA_ttype_speed_time=MIKA_random_key_limit; /* 制限時間を練習時間に設定 */
+							MIKA_type_end_time=MIKA_type_start_time+MIKA_random_key_limit*1000.0; /* 終了時間を開始時間＋制限時間に設定 */
+							MIKA_utikiri_flag=0; /* 練習打ち切りフラグをリセット */
+						}
 						procdispspeed(g); /* 入力速度を表示 */
 						MIKA_type_time_record[MIKA_type_kind_no]=MIKA_type_time_record[MIKA_type_kind_no]+roundtime(MIKA_ttype_speed_time); /* 累積練習時間の記録を加算 */
 						prockiroku(g); /* 記録を更新時の処理 */
@@ -4449,9 +4456,9 @@ function procatrain(g,nChar) /* ローマ字ランダム練習 ローマ字単�
 				MIKA_ttype_speed_time=(MIKA_type_end_time-MIKA_type_start_time)/1000.0; /* 練習時間 秒を計算 */
 			}
 			nChar=uppertolower(nChar); /* 入力文字を小文字に変換 */
-			if (MIKA_key_char==nChar||MIKA_key_char2==nChar) /* 入力文字が正解の場合 */
+			if (MIKA_key_char===nChar||MIKA_key_char2===nChar) /* 入力文字が正解の場合 */
 			{
-				if(MIKA_key_char==' '||((MIKA_key_char==nChar)&&(MIKA_r_count+1>=MIKA_romaji_length))||((MIKA_key_char2==nChar)&&(MIKA_r_count+1>=MIKA_romaji_length2))) /* 正解がスペースかローマ字入力文字数がひらがなローマ字表記の文字数を超えた場合 */
+				if(MIKA_key_char===' '||((MIKA_key_char===nChar)&&(MIKA_r_count+1>=MIKA_romaji_length))||((MIKA_key_char2===nChar)&&(MIKA_r_count+1>=MIKA_romaji_length2))) /* 正解がスペースかローマ字入力文字数がひらがなローマ字表記の文字数を超えた場合 */
 				{
 					if(MIKA_w_count+1>=MIKA_cline_c) /* すべての練習文字を入力した場合は練習を終了 */
 					{
@@ -4472,6 +4479,12 @@ function procatrain(g,nChar) /* ローマ字ランダム練習 ローマ字単�
 							cslputu(g,MIKA_t_line*16+MIKA_c_p2*20,(MIKA_c_p1)*16,"aa",1,MIKA_color_text_under_line); /* ひらがなの練習文字に下線を表示 */
 							MIKA_utikiri_flag=1; /* 練習打ち切りフラグをセット */
 							MIKA_utikiri_flag2=0; /* 前回練習速度消去用にフラグをクリア */
+							if(MIKA_ttype_speed_time>MIKA_random_key_limit) /* 練習時間が制限時間を越した場合 */
+							{
+								MIKA_ttype_speed_time=MIKA_random_key_limit; /* 制限時間を練習時間に設定 */
+								MIKA_type_end_time=MIKA_type_start_time+MIKA_random_key_limit*1000.0; /* 終了時間を開始時間＋制限時間に設定 */
+								MIKA_utikiri_flag=0; /* 練習打ち切りフラグをリセット */
+							}
 							procdispspeed2(g); /* ローマ字入力速度を表示 */
 							MIKA_type_time_record[MIKA_type_kind_no]=MIKA_type_time_record[MIKA_type_kind_no]+roundtime(MIKA_ttype_speed_time); /* 累積練習時間の記録を加算 */
 							prockiroku(g); /* 記録を更新時の処理 */
@@ -4498,7 +4511,7 @@ function procatrain(g,nChar) /* ローマ字ランダム練習 ローマ字単�
 					MIKA_time_start_flag=1; /* 練習時間計測フラグセット */
 					MIKA_Procatimer = setInterval(Procatimer,MIKA_random_time_interval,g); /* タイマーを一秒間隔でセット */
 				}
-				if(MIKA_key_char!=nChar&&MIKA_key_char2==nChar) /* 正解が二番目表記のローマ字の場合 */
+				if(MIKA_key_char!==nChar&&MIKA_key_char2===nChar) /* 正解が二番目表記のローマ字の場合 */
 				{
 					dispromaji(g,MIKA_romaji,1); /* 表示中のローマ字を消去 */
 					MIKA_key_char=MIKA_key_char2; /* 二番目の表記のローマ字の文字を一番目の表記の文字に設定 */
@@ -4509,7 +4522,7 @@ function procatrain(g,nChar) /* ローマ字ランダム練習 ローマ字単�
 					MIKA_romaji_length2=0; /* 二番目の表記のローマ字の文字数をクリア */
 					dispromaji(g,MIKA_romaji,0); /* ローマ字再表示 */
 				}
-				else if(MIKA_key_char==nChar&&MIKA_key_char2!=nChar) /* 正解が一番目の表記のローマ字の場合 */
+				else if(MIKA_key_char===nChar&&MIKA_key_char2!==nChar) /* 正解が一番目の表記のローマ字の場合 */
 				{
 					MIKA_key_char2=0;  /* 二番目の表記のローマ字の文字をクリア */
 					MIKA_romaji2=null; /* 二番目の表記のローマ字をクリア */
@@ -4523,7 +4536,7 @@ function procatrain(g,nChar) /* ローマ字ランダム練習 ローマ字単�
 				}
 				cslputu(g,MIKA_romaji_underline,38*8+MIKA_r_count*32,"aaaa",1,MIKA_color_romaji_under_line); /* ローマ字ガイドの正解に下線を表示 */
 				MIKA_r_count++; /* 入力ローマ字位置加算 */
-				if(MIKA_key_char==' '||MIKA_r_count>=MIKA_romaji_length) /* 正解がスペースかローマ字入力文字数がひらがなローマ字表記の文字数を超えた場合 */
+				if(MIKA_key_char===' '||MIKA_r_count>=MIKA_romaji_length) /* 正解がスペースかローマ字入力文字数がひらがなローマ字表記の文字数を超えた場合 */
 				{
 					MIKA_w_count++; /* 正解数を加算 */
 					cslputu(g,MIKA_t_line*16+MIKA_c_p2*20,(MIKA_c_p1)*16,"aa",1,MIKA_color_text_under_line); /* ひらがなの練習文字に下線を表示 */
